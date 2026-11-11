@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Susur Galur Keluarga Moden</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts & FontAwesome untuk ikon moden -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Moden -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fa-solid fa-network-wired"></i> Salasilah</h2>
+                <p>Sistem Susur Galur Keluarga</p>
+            </div>
+            
+            <div class="sidebar-menu">
+                <button class="btn-primary" onclick="openAddModal()">
+                    <i class="fa-solid fa-user-plus"></i> Tambah Ahli Keluarga
+                </button>
+                <div class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari nama ahli..." oninput="filterMembers()">
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <h3>Statistik Keluarga</h3>
+                <p>Jumlah Ahli: <span id="totalMembers">0</span></p>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Projek Web GitHub Ready</p>
+            </div>
+        </aside>
+
+        <!-- Kandungan Utama (Carta) -->
+        <main class="main-content">
+            <header class="topbar">
+                <h1>Peta Susur Galur Generasi</h1>
+                <div class="topbar-actions">
+                    <button class="btn-secondary" onclick="resetData()"><i class="fa-solid fa-rotate-right"></i> Set Semula</button>
+                    <button class="btn-secondary" onclick="exportData()"><i class="fa-solid fa-download"></i> Eksport JSON</button>
+                </div>
+            </header>
+
+            <div class="canvas-container" id="treeContainer">
+                <!-- Carta Salasilah akan dijanakan di sini secara dinamik -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Tambah/Sunting Ahli -->
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Tambah Ahli Keluarga Baru</h2>
+            <form id="memberForm" onsubmit="saveMember(event)">
+                <input type="hidden" id="memberId">
+                
+                <div class="form-group">
+                    <label>Nama Penuh</label>
+                    <input type="text" id="memberName" required placeholder="Contoh: Ahmad Bin Hasan">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Jantina</label>
+                        <select id="memberGender">
+                            <option value="Lelaki">Lelaki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Generasi (Gen)</label>
+                        <input type="number" id="memberGen" min="1" value="1" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ibu Bapa (Pilihan - Kosongkan jika Gen 1 / Paling Atas)</label>
+                    <select id="parentSelect">
+                        <option value="">-- Tiada (Generasi Pertama) --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Status Perkahwinan & Pasangan</label>
+                    <select id="maritalStatus" onchange="toggleSpouseFields()">
+                        <option value="Bujang">Bujang / Belum Kahwin</option>
+                        <option value="Kahwin">Berkahwin</option>
+                        <option value="Cerai">Pernah Kahwin / Cerai</option>
+                    </select>
+                </div>
+
+                <div id="spouseContainer" style="display:none;">
+                    <div class="form-group">
+                        <label>Nama Pasangan (Suami / Isteri)</label>
+                        <input type="text" id="spouseName" placeholder="Contoh: Siti Aminah">
+                    </div>
+                    <div class="form-group">
+                        <label>Status Hubungan Pasangan</label>
+                        <select id="spouseActiveStatus">
+                            <option value="active">Masih Bersama (Aktif)</option>
+                            <option value="divorced">Sudah Bercerai</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn-primary">Simpan Rekod</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
