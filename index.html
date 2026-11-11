@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Salasilah Keluarga - Genogram Tepat</title>
+    <title>Salasilah Keluarga - Profesional Genogram</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: #080705; color: #f1f1f1; width: 100vw; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        .top-bar { position: fixed; top: 15px; left: 15px; z-index: 100; display: flex; gap: 8px; }
-        .btn-gold { background: linear-gradient(135deg, #d4af37, #aa7c11); color: #000; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); display: flex; align-items: center; gap: 6px; }
-        .btn-secondary { background: rgba(20,20,20,0.8); border: 1px solid rgba(239,68,68,0.4); color: #f87171; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+        .top-bar { position: fixed; top: 15px; left: 15px; z-index: 100; display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-gold { background: linear-gradient(135deg, #d4af37, #aa7c11); color: #000; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); display: flex; align-items: center; gap: 5px; }
+        .btn-secondary { background: rgba(20,20,20,0.85); border: 1px solid rgba(212, 175, 55, 0.3); color: #d4af37; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
+        .btn-danger { background: rgba(20,20,20,0.85); border: 1px solid rgba(239,68,68,0.4); color: #f87171; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
 
         #viewport { width: 100%; height: 100%; cursor: grab; position: relative; overflow: hidden; touch-action: none; }
         #viewport:active { cursor: grabbing; }
@@ -48,6 +49,9 @@
         .card-actions { position: absolute; top: -6px; right: -6px; display: flex; gap: 3px; }
         .card-actions button { background: #111; border: 1px solid #d4af37; color: #d4af37; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
 
+        .empty-state { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #777; z-index: 10; pointer-events: none; }
+        .empty-state h3 { font-size: 1.2rem; color: #d4af37; margin-bottom: 6px; }
+
         .footer-hint { position: fixed; bottom: 15px; right: 15px; background: rgba(20, 20, 20, 0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 15px; font-size: 0.7rem; color: #aaa; pointer-events: none; z-index: 90; }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
@@ -63,12 +67,19 @@
 <body>
 
     <div class="top-bar">
-        <button class="btn-gold" onclick="openModal()"><i class="fa-solid fa-user-plus"></i> Tambah Rekod</button>
-        <button class="btn-secondary" onclick="resetData()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+        <button class="btn-gold" onclick="openModal()"><i class="fa-solid fa-user-plus"></i> Tambah</button>
+        <button class="btn-secondary" onclick="downloadJSON()"><i class="fa-solid fa-download"></i> Muat Turun Data</button>
+        <button class="btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Muat Naik</button>
+        <input type="file" id="importFile" style="display:none" accept=".json" onchange="uploadJSON(event)">
+        <button class="btn-danger" onclick="resetData()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
     </div>
 
     <div id="viewport">
         <div id="canvasContainer">
+            <div id="emptyMessage" class="empty-state" style="display:none;">
+                <h3>Tiada Rekod Salasilah</h3>
+                <p>Sila klik butang "Tambah" di atas untuk mula membina carta keluarga.</p>
+            </div>
             <svg id="svgCanvas"></svg>
         </div>
     </div>
@@ -83,7 +94,7 @@
                 <input type="hidden" id="memberId">
                 <div class="form-group">
                     <label>Nama Individu Utama (Kiri)</label>
-                    <input type="text" id="mainName" required placeholder="Contoh: Satu bin Kosong">
+                    <input type="text" id="mainName" required placeholder="Contoh: Ayah atau Ibu">
                 </div>
                 <div class="form-group">
                     <label>Jantina Individu Utama</label>
@@ -114,7 +125,7 @@
                 </div>
 
                 <hr style="border-color:#333; margin: 12px 0;">
-                <label style="color:#d4af37; font-size:0.8rem; font-weight:600; display:block; margin-bottom:8px;">Senarai Pasangan</label>
+                <label style="color:#d4af37; font-size:0.8rem; font-weight:600; display:block; margin-bottom:8px;">Senarai Pasangan (Sehingga 4 Orang)</label>
                 
                 <!-- Pasangan 1 -->
                 <div class="spouse-block">
@@ -153,35 +164,13 @@
     </div>
 
     <script>
-        let familyData = JSON.parse(localStorage.getItem('genogramFixData')) || [
-            { 
-                id: "1", 
-                mainName: "Kosong bin sa...", 
-                mainGender: "L", 
-                gen: 1, 
-                parentId: "", 
-                lineageSource: "main",
-                spouses: [
-                    { name: "Yayi 1", gender: "P", status: "cerai" },
-                    { name: "Yayi 2", gender: "P", status: "active" }
-                ]
-            },
-            {
-                id: "2",
-                mainName: "Satu bin Koso...",
-                mainGender: "P",
-                gen: 2,
-                parentId: "1",
-                lineageSource: "spouse0", // Turun dari Yayi 1 (P)
-                spouses: [
-                    { name: "Yuyu", gender: "L", status: "active" }
-                ]
-            }
-        ];
+        // Default bermula kosong (bersih & profesional)
+        let familyData = JSON.parse(localStorage.getItem('professionalGenogram')) || [];
 
         const viewport = document.getElementById('viewport');
         const container = document.getElementById('canvasContainer');
         const svgCanvas = document.getElementById('svgCanvas');
+        const emptyMessage = document.getElementById('emptyMessage');
         let scale = 1, panX = window.innerWidth / 2 - 200, panY = 80;
         let isDragging = false, startX, startY;
 
@@ -213,6 +202,14 @@
             const existingLevels = container.querySelectorAll('.gen-level');
             existingLevels.forEach(el => el.remove());
             svgCanvas.innerHTML = "";
+
+            if (familyData.length === 0) {
+                emptyMessage.style.display = "block";
+                updateParentDropdown();
+                return;
+            } else {
+                emptyMessage.style.display = "none";
+            }
 
             let gens = {};
             familyData.forEach(m => {
@@ -268,7 +265,6 @@
                 container.appendChild(row);
             });
 
-            // Lukis Garisan SVG Keturunan Tepat Mengikut Sumber Ibu/Bapa
             setTimeout(() => {
                 familyData.forEach(m => {
                     if (m.parentId) {
@@ -282,7 +278,6 @@
                                 sourceEl = document.getElementById(`spouse-${m.parentId}-${spouseIdx}`);
                             }
                             
-                            // Jika tiada atau dipilih dari individu utama
                             if (!sourceEl) {
                                 sourceEl = document.getElementById(`main-node-${m.parentId}`);
                             }
@@ -357,7 +352,7 @@
                 familyData.push({ id: Date.now().toString(), mainName, mainGender, gen, parentId, lineageSource, spouses });
             }
 
-            localStorage.setItem('genogramFixData', JSON.stringify(familyData));
+            localStorage.setItem('professionalGenogram', JSON.stringify(familyData));
             closeModal();
             renderTree();
         }
@@ -395,7 +390,7 @@
         function deleteMember(id) {
             if (confirm("Padam rekod ini?")) {
                 familyData = familyData.filter(m => m.id !== id);
-                localStorage.setItem('genogramFixData', JSON.stringify(familyData));
+                localStorage.setItem('professionalGenogram', JSON.stringify(familyData));
                 renderTree();
             }
         }
@@ -408,10 +403,40 @@
             });
         }
 
+        // Muat Turun Data ke fail .json
+        function downloadJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(familyData, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "salasilah_keluarga.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        // Muat Naik Semula (Upload) fail .json
+        function uploadJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    familyData = JSON.parse(e.target.result);
+                    localStorage.setItem('professionalGenogram', JSON.stringify(familyData));
+                    renderTree();
+                    alert("Data salasilah berjaya dimuat naik!");
+                } catch(err) {
+                    alert("Format fail tidak sah!");
+                }
+            };
+            reader.readAsText(file);
+        }
+
         function resetData() {
-            if (confirm("Tetapkan semula semua data?")) {
-                localStorage.removeItem('genogramFixData');
-                location.reload();
+            if (confirm("Padam semua data dan mula kosong?")) {
+                localStorage.removeItem('professionalGenogram');
+                familyData = [];
+                renderTree();
             }
         }
 
