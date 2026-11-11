@@ -3,122 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Susur Galur Keluarga Moden</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts & FontAwesome untuk ikon moden -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Salasilah Keluarga - Trend Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: #080705;
+            color: #f1f1f1;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header / Statistik atas gaya TikTok */
+        .header-stats {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .header-stats h4 {
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            color: #d4af37;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .header-stats h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-top: 4px;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Kotak Arahan / Info Bawah */
+        .footer-info {
+            position: absolute;
+            bottom: 20px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #aaa;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        /* Container Canvas yang boleh di-zoom */
+        #viewport {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #viewport:active {
+            cursor: grabbing;
+        }
+
+        #treeCanvas {
+            transform-origin: center center;
+            transition: transform 0.05s ease-out;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar Moden -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fa-solid fa-network-wired"></i> Salasilah</h2>
-                <p>Sistem Susur Galur Keluarga</p>
-            </div>
-            
-            <div class="sidebar-menu">
-                <button class="btn-primary" onclick="openAddModal()">
-                    <i class="fa-solid fa-user-plus"></i> Tambah Ahli Keluarga
-                </button>
-                <div class="search-box">
-                    <i class="fa-solid fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Cari nama ahli..." oninput="filterMembers()">
-                </div>
-            </div>
 
-            <div class="stats-card">
-                <h3>Statistik Keluarga</h3>
-                <p>Jumlah Ahli: <span id="totalMembers">0</span></p>
-            </div>
-
-            <div class="sidebar-footer">
-                <p>Projek Web GitHub Ready</p>
-            </div>
-        </aside>
-
-        <!-- Kandungan Utama (Carta) -->
-        <main class="main-content">
-            <header class="topbar">
-                <h1>Peta Susur Galur Generasi</h1>
-                <div class="topbar-actions">
-                    <button class="btn-secondary" onclick="resetData()"><i class="fa-solid fa-rotate-right"></i> Set Semula</button>
-                    <button class="btn-secondary" onclick="exportData()"><i class="fa-solid fa-download"></i> Eksport JSON</button>
-                </div>
-            </header>
-
-            <div class="canvas-container" id="treeContainer">
-                <!-- Carta Salasilah akan dijanakan di sini secara dinamik -->
-            </div>
-        </main>
+    <div class="header-stats">
+        <h4>Ancestors • Salasilah</h4>
+        <h1 id="totalCount">64</h1>
     </div>
 
-    <!-- Modal Tambah/Sunting Ahli -->
-    <div id="memberModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle">Tambah Ahli Keluarga Baru</h2>
-            <form id="memberForm" onsubmit="saveMember(event)">
-                <input type="hidden" id="memberId">
-                
-                <div class="form-group">
-                    <label>Nama Penuh</label>
-                    <input type="text" id="memberName" required placeholder="Contoh: Ahmad Bin Hasan">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Jantina</label>
-                        <select id="memberGender">
-                            <option value="Lelaki">Lelaki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Generasi (Gen)</label>
-                        <input type="number" id="memberGen" min="1" value="1" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Ibu Bapa (Pilihan - Kosongkan jika Gen 1 / Paling Atas)</label>
-                    <select id="parentSelect">
-                        <option value="">-- Tiada (Generasi Pertama) --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Status Perkahwinan & Pasangan</label>
-                    <select id="maritalStatus" onchange="toggleSpouseFields()">
-                        <option value="Bujang">Bujang / Belum Kahwin</option>
-                        <option value="Kahwin">Berkahwin</option>
-                        <option value="Cerai">Pernah Kahwin / Cerai</option>
-                    </select>
-                </div>
-
-                <div id="spouseContainer" style="display:none;">
-                    <div class="form-group">
-                        <label>Nama Pasangan (Suami / Isteri)</label>
-                        <input type="text" id="spouseName" placeholder="Contoh: Siti Aminah">
-                    </div>
-                    <div class="form-group">
-                        <label>Status Hubungan Pasangan</label>
-                        <select id="spouseActiveStatus">
-                            <option value="active">Masih Bersama (Aktif)</option>
-                            <option value="divorced">Sudah Bercerai</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal()">Batal</button>
-                    <button type="submit" class="btn-primary">Simpan Rekod</button>
-                </div>
-            </form>
-        </div>
+    <div id="viewport">
+        <canvas id="treeCanvas" width="1200" height="900"></canvas>
     </div>
 
-    <script src="script.js"></script>
+    <div class="footer-info">
+        Gunakan <b>Skrol Tetikus (Mouse Wheel)</b> untuk Zum In / Zum Out • Klik dan Heret untuk gerakkan peta.
+    </div>
+
+    <script>
+        const canvas = document.getElementById('treeCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Pembolehubah Zoom & Pan
+        let scale = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        const viewport = document.getElementById('viewport');
+
+        // Data Simulasi Garis Keturunan Bercabang ke Atas
+        function drawTree() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const startXPos = canvas.width / 2;
+            const startYPos = canvas.height - 100;
+
+            // Lukis nod utama "YOU" di bawah
+            drawNode(startXPos, startYPos, "YOU", true);
+
+            // Cabang Generasi ke Atas (Simulasi Algoritma Kipas)
+            drawBranches(startXPos, startYPos, 350, 5, 0);
+        }
+
+        function drawBranches(x, y, spread, level, parentAngle) {
+            if (level <= 0) return;
+
+            const nextY = y - 130;
+            const leftX = x - spread;
+            const rightX = x + spread;
+
+            // Garisan bercabang ke kiri dan kanan atas (Gaya Emas Bersinar)
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.quadraticCurveTo(x, y - 60, leftX, nextY);
+            ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+            ctx.lineWidth = level * 0.6;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.quadraticCurveTo(x, y - 60, rightX, nextY);
+            ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+            ctx.lineWidth = level * 0.6;
+            ctx.stroke();
+
+            // Lukis titik nod generasi
+            drawNode(leftX, nextY, "", false);
+            drawNode(rightX, nextY, "", false);
+
+            // Rekursi untuk generasi seterusnya ke atas
+            drawBranches(leftX, nextY, spread / 1.8, level - 1);
+            drawBranches(rightX, nextY, spread / 1.8, level - 1);
+        }
+
+        function drawNode(x, y, label, isYou) {
+            ctx.beginPath();
+            ctx.arc(x, y, isYou ? 8 : 4, 0, Math.PI * 2);
+            ctx.fillStyle = isYou ? "#ffffff" : "#d4af37";
+            ctx.shadowColor = "#d4af37";
+            ctx.shadowBlur = isYou ? 25 : 10;
+            ctx.fill();
+            ctx.shadowBlur = 0; // Reset shadow
+
+            if (label) {
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "600 14px 'Outfit', sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(label, x, y + 30);
+            }
+        }
+
+        // Fungsi Kemas Kini Paparan Transformasi (Zoom & Pan)
+        function updateTransform() {
+            canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        }
+
+        // Event Listener untuk Zum (Mouse Wheel)
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomIntensity = 0.1;
+            if (e.deltaY < 0) {
+                scale *= (1 + zoomIntensity);
+            } else {
+                scale /= (1 + zoomIntensity);
+            }
+            // Hadkan had zum (min 0.5x, max 4x)
+            scale = Math.max(0.5, Math.min(scale, 4));
+            updateTransform();
+        });
+
+        // Event Listener untuk Tarik / Geser Peta (Pan)
+        viewport.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Jalankan lukisan carta pada permulaan
+        drawTree();
+    </script>
 </body>
 </html>
