@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Salasilah Keluarga - Sistem Pasangan Dinamik</title>
+    <title>Salasilah Keluarga - Genogram Tepat</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -75,7 +75,7 @@
 
     <div class="footer-hint">Sentuh & Heret untuk gerakkan peta</div>
 
-    <!-- Modal Borang Dinamik -->
+    <!-- Modal Borang -->
     <div id="familyModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle">Tambah Rekod Keluarga</h2>
@@ -83,7 +83,7 @@
                 <input type="hidden" id="memberId">
                 <div class="form-group">
                     <label>Nama Individu Utama (Kiri)</label>
-                    <input type="text" id="mainName" required placeholder="Contoh: Ayah atau Anak">
+                    <input type="text" id="mainName" required placeholder="Contoh: Satu bin Kosong">
                 </div>
                 <div class="form-group">
                     <label>Jantina Individu Utama</label>
@@ -103,17 +103,18 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Sambung Garisan Keturunan Dari Pasangan Ke-</label>
-                    <select id="lineageIndex">
-                        <option value="0">Pasangan 1</option>
-                        <option value="1">Pasangan 2</option>
-                        <option value="2">Pasangan 3</option>
-                        <option value="3">Pasangan 4</option>
+                    <label>Sambung Garisan Keturunan Dari Pihak Mana?</label>
+                    <select id="lineageSource">
+                        <option value="main">Individu Utama (Kiri)</option>
+                        <option value="spouse0">Pasangan 1</option>
+                        <option value="spouse1">Pasangan 2</option>
+                        <option value="spouse2">Pasangan 3</option>
+                        <option value="spouse3">Pasangan 4</option>
                     </select>
                 </div>
 
                 <hr style="border-color:#333; margin: 12px 0;">
-                <label style="color:#d4af37; font-size:0.8rem; font-weight:600; display:block; margin-bottom:8px;">Senarai Pasangan (Sehingga 4 Orang)</label>
+                <label style="color:#d4af37; font-size:0.8rem; font-weight:600; display:block; margin-bottom:8px;">Senarai Pasangan</label>
                 
                 <!-- Pasangan 1 -->
                 <div class="spouse-block">
@@ -152,17 +153,28 @@
     </div>
 
     <script>
-        let familyData = JSON.parse(localStorage.getItem('multiSpouseData')) || [
+        let familyData = JSON.parse(localStorage.getItem('genogramFixData')) || [
             { 
                 id: "1", 
-                mainName: "Ayah", 
+                mainName: "Kosong bin sa...", 
                 mainGender: "L", 
                 gen: 1, 
                 parentId: "", 
-                lineageIndex: 0,
+                lineageSource: "main",
                 spouses: [
-                    { name: "Isteri 1", gender: "P", status: "cerai" },
-                    { name: "Isteri 2", gender: "P", status: "active" }
+                    { name: "Yayi 1", gender: "P", status: "cerai" },
+                    { name: "Yayi 2", gender: "P", status: "active" }
+                ]
+            },
+            {
+                id: "2",
+                mainName: "Satu bin Koso...",
+                mainGender: "P",
+                gen: 2,
+                parentId: "1",
+                lineageSource: "spouse0", // Turun dari Yayi 1 (P)
+                spouses: [
+                    { name: "Yuyu", gender: "L", status: "active" }
                 ]
             }
         ];
@@ -256,6 +268,7 @@
                 container.appendChild(row);
             });
 
+            // Lukis Garisan SVG Keturunan Tepat Mengikut Sumber Ibu/Bapa
             setTimeout(() => {
                 familyData.forEach(m => {
                     if (m.parentId) {
@@ -263,9 +276,13 @@
                         const childEl = document.getElementById(`node-${m.id}`);
 
                         if (parentUnit && childEl) {
-                            const targetSpouseId = `spouse-${m.parentId}-${m.lineageIndex || 0}`;
-                            let sourceEl = document.getElementById(targetSpouseId);
+                            let sourceEl;
+                            if (m.lineageSource && m.lineageSource.startsWith('spouse')) {
+                                const spouseIdx = m.lineageSource.replace('spouse', '');
+                                sourceEl = document.getElementById(`spouse-${m.parentId}-${spouseIdx}`);
+                            }
                             
+                            // Jika tiada atau dipilih dari individu utama
                             if (!sourceEl) {
                                 sourceEl = document.getElementById(`main-node-${m.parentId}`);
                             }
@@ -307,6 +324,7 @@
             document.getElementById('familyForm').reset();
             document.getElementById('memberId').value = "";
             document.getElementById('mainGender').value = "L";
+            document.getElementById('lineageSource').value = "main";
             document.getElementById('familyModal').style.display = "flex";
         }
 
@@ -319,7 +337,7 @@
             const mainGender = document.getElementById('mainGender').value;
             const gen = parseInt(document.getElementById('memberGen').value);
             const parentId = document.getElementById('parentSelect').value;
-            const lineageIndex = parseInt(document.getElementById('lineageIndex').value);
+            const lineageSource = document.getElementById('lineageSource').value;
 
             let spouses = [];
             for(let i=0; i<4; i++) {
@@ -334,12 +352,12 @@
             }
 
             if (id) {
-                familyData = familyData.map(m => m.id === id ? { ...m, mainName, mainGender, gen, parentId, lineageIndex, spouses } : m);
+                familyData = familyData.map(m => m.id === id ? { ...m, mainName, mainGender, gen, parentId, lineageSource, spouses } : m);
             } else {
-                familyData.push({ id: Date.now().toString(), mainName, mainGender, gen, parentId, lineageIndex, spouses });
+                familyData.push({ id: Date.now().toString(), mainName, mainGender, gen, parentId, lineageSource, spouses });
             }
 
-            localStorage.setItem('multiSpouseData', JSON.stringify(familyData));
+            localStorage.setItem('genogramFixData', JSON.stringify(familyData));
             closeModal();
             renderTree();
         }
@@ -353,7 +371,7 @@
             document.getElementById('mainGender').value = m.mainGender || "L";
             document.getElementById('memberGen').value = m.gen;
             document.getElementById('parentSelect').value = m.parentId || "";
-            document.getElementById('lineageIndex').value = m.lineageIndex || 0;
+            document.getElementById('lineageSource').value = m.lineageSource || "main";
 
             for(let i=0; i<4; i++) {
                 document.getElementById(`s${i}_name`).value = "";
@@ -377,7 +395,7 @@
         function deleteMember(id) {
             if (confirm("Padam rekod ini?")) {
                 familyData = familyData.filter(m => m.id !== id);
-                localStorage.setItem('multiSpouseData', JSON.stringify(familyData));
+                localStorage.setItem('genogramFixData', JSON.stringify(familyData));
                 renderTree();
             }
         }
@@ -392,7 +410,7 @@
 
         function resetData() {
             if (confirm("Tetapkan semula semua data?")) {
-                localStorage.removeItem('multiSpouseData');
+                localStorage.removeItem('genogramFixData');
                 location.reload();
             }
         }
