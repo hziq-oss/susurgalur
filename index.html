@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Salasilah Keluarga - Mobile Friendly</title>
+    <title>Salasilah Keluarga - Style Pedigri Genetik</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,13 +17,13 @@
         #viewport { width: 100%; height: 100%; cursor: grab; position: relative; overflow: hidden; touch-action: none; }
         #viewport:active { cursor: grabbing; }
 
-        #canvasContainer { position: absolute; transform-origin: 0 0; display: flex; flex-direction: column; align-items: center; padding: 100px 50px; }
+        #canvasContainer { position: absolute; transform-origin: 0 0; display: flex; flex-direction: column; align-items: center; padding: 100px; min-width: 4000px; min-height: 3000px; }
 
-        .gen-level { display: flex; gap: 30px; justify-content: center; margin-bottom: 70px; position: relative; }
-        .gen-title { position: absolute; left: -80px; top: 30px; color: #d4af37; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
+        #svgCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 
-        .family-branch { display: flex; flex-direction: column; align-items: center; position: relative; }
-        
+        .gen-level { display: flex; gap: 120px; justify-content: center; margin-bottom: 180px; position: relative; z-index: 2; }
+        .gen-title { position: absolute; left: -100px; top: 20px; color: #d4af37; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
+
         .marriage-unit {
             background: rgba(20, 20, 18, 0.95);
             border: 1px solid rgba(212, 175, 55, 0.4);
@@ -31,7 +31,7 @@
             padding: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.7);
             position: relative;
         }
@@ -45,13 +45,11 @@
         .badge-divorced { background: rgba(239, 68, 68, 0.2); color: #f87171; }
 
         .spouse-divider { color: #d4af37; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; }
-
         .card-actions { position: absolute; top: -6px; right: -6px; display: flex; gap: 3px; }
         .card-actions button { background: #111; border: 1px solid #d4af37; color: #d4af37; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; }
 
         .footer-hint { position: fixed; bottom: 15px; right: 15px; background: rgba(20, 20, 20, 0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 15px; font-size: 0.7rem; color: #aaa; pointer-events: none; z-index: 90; }
 
-        /* Modal Responsif */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: #121210; border: 1px solid rgba(212, 175, 55, 0.4); padding: 25px; border-radius: 14px; width: 100%; max-width: 380px; color: #fff; }
         .modal-content h2 { margin-bottom: 15px; color: #d4af37; font-size: 1.1rem; }
@@ -69,7 +67,9 @@
     </div>
 
     <div id="viewport">
-        <div id="canvasContainer"></div>
+        <div id="canvasContainer">
+            <svg id="svgCanvas"></svg>
+        </div>
     </div>
 
     <div class="footer-hint">Sentuh & Heret untuk gerakkan peta</div>
@@ -81,15 +81,22 @@
             <form id="familyForm" onsubmit="saveData(event)">
                 <input type="hidden" id="memberId">
                 <div class="form-group">
-                    <label>Nama Penuh</label>
-                    <input type="text" id="memberName" required placeholder="Contoh: Ali">
+                    <label>Nama Penuh / Simbol</label>
+                    <input type="text" id="memberName" required placeholder="Contoh: Ali (L) atau Siti (P)">
+                </div>
+                <div class="form-group">
+                    <label>Jantina</label>
+                    <select id="memberGender">
+                        <option value="L">Lelaki (L)</option>
+                        <option value="P">Perempuan (P)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Generasi (Gen)</label>
                     <input type="number" id="memberGen" min="1" value="1" required>
                 </div>
                 <div class="form-group">
-                    <label>Pilih Ayah / Ibu (Keluarga Asal)</label>
+                    <label>Pilih Ibu Bapa (Pihak yang Menurunkan Zuriat)</label>
                     <select id="parentSelect">
                         <option value="">-- Tiada (Gen 1 Utama) --</option>
                     </select>
@@ -98,14 +105,14 @@
                     <label>Status Perkahwinan</label>
                     <select id="maritalStatus" onchange="toggleSpouse()">
                         <option value="bujang">Bujang</option>
-                        <option value="kahwin">Berkahwin (Aktif)</option>
-                        <option value="cerai">Pernah Kahwin / Cerai</option>
+                        <option value="kahwin">Berkahwin</option>
+                        <option value="cerai">Bercerai</option>
                     </select>
                 </div>
                 <div id="spouseBox" style="display:none;">
                     <div class="form-group">
-                        <label>Nama Isteri / Pasangan</label>
-                        <input type="text" id="spouseName" placeholder="Nama Isteri">
+                        <label>Nama Pasangan</label>
+                        <input type="text" id="spouseName" placeholder="Nama Isteri / Suami">
                     </div>
                 </div>
                 <div class="modal-actions">
@@ -117,43 +124,35 @@
     </div>
 
     <script>
-        let familyData = JSON.parse(localStorage.getItem('mobileFamilyData')) || [
-            { id: "1", name: "Hasan", gen: 1, parentId: "", maritalStatus: "kahwin", spouseName: "Siti" },
-            { id: "2", name: "Ahmad", gen: 2, parentId: "1", maritalStatus: "kahwin", spouseName: "Fatima" }
+        let familyData = JSON.parse(localStorage.getItem('genogramData')) || [
+            { id: "1", name: "Ayah (L)", gender: "L", gen: 1, parentId: "", maritalStatus: "kahwin", spouseName: "Isteri 1 (P)" },
+            { id: "2", name: "Anak 1 (L)", gender: "L", gen: 2, parentId: "1", maritalStatus: "bujang", spouseName: "" }
         ];
 
-        // Viewport & Touch/Mouse Gestures
         const viewport = document.getElementById('viewport');
         const container = document.getElementById('canvasContainer');
-        let scale = 1, panX = window.innerWidth / 2 - 100, panY = 100;
+        const svgCanvas = document.getElementById('svgCanvas');
+        let scale = 1, panX = window.innerWidth / 2 - 150, panY = 80;
         let isDragging = false, startX, startY;
 
         function updateTransform() {
             container.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
         }
 
-        // Sokongan Tetikus (PC)
+        // Gesture Drag (PC & Mobile)
         viewport.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY; });
         window.addEventListener('mousemove', (e) => { if (!isDragging) return; panX = e.clientX - startX; panY = e.clientY - startY; updateTransform(); });
         window.addEventListener('mouseup', () => isDragging = false);
 
-        // Sokongan Sentuhan Jari (Telefon / Mobile Touch)
         viewport.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                isDragging = true;
-                startX = e.touches[0].clientX - panX;
-                startY = e.touches[0].clientY - panY;
-            }
+            if (e.touches.length === 1) { isDragging = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY; }
         });
         window.addEventListener('touchmove', (e) => {
             if (!isDragging || e.touches.length !== 1) return;
-            panX = e.touches[0].clientX - startX;
-            panY = e.touches[0].clientY - startY;
-            updateTransform();
+            panX = e.touches[0].clientX - startX; panY = e.touches[0].clientY - startY; updateTransform();
         });
         window.addEventListener('touchend', () => isDragging = false);
 
-        // Zoom Skrol (PC) & Pinch (Telefon)
         viewport.addEventListener('wheel', (e) => {
             e.preventDefault();
             scale = e.deltaY < 0 ? scale * 1.1 : scale / 1.1;
@@ -161,9 +160,11 @@
             updateTransform();
         }, { passive: false });
 
-        // Render Carta
         function renderTree() {
-            container.innerHTML = "";
+            const existingLevels = container.querySelectorAll('.gen-level');
+            existingLevels.forEach(el => el.remove());
+            svgCanvas.innerHTML = "";
+
             let gens = {};
             familyData.forEach(m => {
                 if (!gens[m.gen]) gens[m.gen] = [];
@@ -178,6 +179,7 @@
                 gens[genNum].forEach(m => {
                     const branch = document.createElement('div');
                     branch.className = 'family-branch';
+                    branch.id = `node-${m.id}`;
 
                     let spouseHTML = '';
                     if (m.maritalStatus !== 'bujang' && m.spouseName) {
@@ -185,7 +187,7 @@
                         spouseHTML = `
                             <div class="spouse-divider"><i class="fa-solid fa-ring"></i></div>
                             <div class="person-card">
-                                <div class="avatar"><i class="fa-solid fa-user-tie" style="color:#f43f5e"></i></div>
+                                <div class="avatar"><i class="fa-solid ${m.gender === 'L' ? 'fa-venus' : 'fa-mars'}" style="color:#f43f5e"></i></div>
                                 <div class="name">${m.spouseName}</div>
                                 <div class="badge ${isCerai ? 'badge-divorced' : 'badge-active'}">${isCerai ? 'Cerai' : 'Aktif'}</div>
                             </div>
@@ -195,9 +197,9 @@
                     branch.innerHTML = `
                         <div class="marriage-unit">
                             <div class="person-card">
-                                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                                <div class="avatar"><i class="fa-solid ${m.gender === 'L' ? 'fa-mars' : 'fa-venus'}"></i></div>
                                 <div class="name">${m.name}</div>
-                                <div class="badge badge-active">Utama</div>
+                                <div class="badge badge-active">${m.gender}</div>
                             </div>
                             ${spouseHTML}
                             <div class="card-actions">
@@ -210,7 +212,45 @@
                 });
                 container.appendChild(row);
             });
+
+            // Lukis Garisan SVG Keturunan dari Ibu/Ayah ke Anak
+            setTimeout(() => {
+                familyData.forEach(m => {
+                    if (m.parentId) {
+                        const parentEl = document.getElementById(`node-${m.parentId}`);
+                        const childEl = document.getElementById(`node-${m.id}`);
+
+                        if (parentEl && childEl) {
+                            const pRect = parentEl.getBoundingClientRect();
+                            const cRect = childEl.getBoundingClientRect();
+                            const cRectContainer = container.getBoundingClientRect();
+
+                            const x1 = (pRect.left + pRect.width / 2 - cRectContainer.left) / scale;
+                            const y1 = (pRect.bottom - cRectContainer.top) / scale;
+                            const x2 = (cRect.left + cRect.width / 2 - cRectContainer.left) / scale;
+                            const y2 = (cRect.top - cRectContainer.top) / scale;
+
+                            drawSVGLine(x1, y1, x2, y2);
+                        }
+                    }
+                });
+            }, 50);
+
             updateParentDropdown();
+        }
+
+        function drawSVGLine(x1, y1, x2, y2) {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const midY = (y1 + y2) / 2;
+            const d = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`;
+            
+            path.setAttribute("d", d);
+            path.setAttribute("stroke", "#d4af37");
+            path.setAttribute("stroke-width", "2");
+            path.setAttribute("fill", "none");
+            path.setAttribute("opacity", "0.7");
+            
+            svgCanvas.appendChild(path);
         }
 
         function openModal() {
@@ -231,18 +271,19 @@
             e.preventDefault();
             const id = document.getElementById('memberId').value;
             const name = document.getElementById('memberName').value;
+            const gender = document.getElementById('memberGender').value;
             const gen = parseInt(document.getElementById('memberGen').value);
             const parentId = document.getElementById('parentSelect').value;
             const maritalStatus = document.getElementById('maritalStatus').value;
             const spouseName = document.getElementById('spouseName').value;
 
             if (id) {
-                familyData = familyData.map(m => m.id === id ? { ...m, name, gen, parentId, maritalStatus, spouseName } : m);
+                familyData = familyData.map(m => m.id === id ? { ...m, name, gender, gen, parentId, maritalStatus, spouseName } : m);
             } else {
-                familyData.push({ id: Date.now().toString(), name, gen, parentId, maritalStatus, spouseName });
+                familyData.push({ id: Date.now().toString(), name, gender, gen, parentId, maritalStatus, spouseName });
             }
 
-            localStorage.setItem('mobileFamilyData', JSON.stringify(familyData));
+            localStorage.setItem('genogramData', JSON.stringify(familyData));
             closeModal();
             renderTree();
         }
@@ -253,6 +294,7 @@
             document.getElementById('modalTitle').innerText = "Sunting Maklumat";
             document.getElementById('memberId').value = m.id;
             document.getElementById('memberName').value = m.name;
+            document.getElementById('memberGender').value = m.gender || "L";
             document.getElementById('memberGen').value = m.gen;
             document.getElementById('parentSelect').value = m.parentId || "";
             document.getElementById('maritalStatus').value = m.maritalStatus;
@@ -264,7 +306,7 @@
         function deleteMember(id) {
             if (confirm("Padam rekod ini?")) {
                 familyData = familyData.filter(m => m.id !== id);
-                localStorage.setItem('mobileFamilyData', JSON.stringify(familyData));
+                localStorage.setItem('genogramData', JSON.stringify(familyData));
                 renderTree();
             }
         }
@@ -279,7 +321,7 @@
 
         function resetData() {
             if (confirm("Tetapkan semula semua data?")) {
-                localStorage.removeItem('mobileFamilyData');
+                localStorage.removeItem('genogramData');
                 location.reload();
             }
         }
