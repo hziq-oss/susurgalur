@@ -91,11 +91,13 @@
 
     <div class="top-bar">
         <button class="btn-gold" onclick="openModal()"><i class="fa-solid fa-user-plus"></i> Tambah</button>
+        <button class="btn-secondary" onclick="zoomIn()"><i class="fa-solid fa-magnifying-glass-plus"></i> Zoom +</button>
+        <button class="btn-secondary" onclick="zoomOut()"><i class="fa-solid fa-magnifying-glass-minus"></i> Zoom -</button>
+        <button class="btn-secondary" onclick="centerView()"><i class="fa-solid fa-crosshairs"></i> Pusatkan</button>
         <button class="btn-secondary" onclick="downloadJSON()"><i class="fa-solid fa-download"></i> Muat Turun</button>
         <button class="btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Muat Naik</button>
         <input type="file" id="importFile" style="display:none" accept=".json" onchange="uploadJSON(event)">
         <button class="btn-danger" onclick="resetData()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
-        <button class="btn-secondary" onclick="centerView()"><i class="fa-solid fa-crosshairs"></i> Pusatkan</button>
     </div>
 
     <div id="viewport">
@@ -202,45 +204,49 @@
             container.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
         }
 
-        // Fungsi Auto-Center Pandangan ke Tengah Salasilah
-        // Fungsi Pusatkan Semula Pintar (Auto-Center mengikut kedudukan kad sebenar)
-function centerView() {
-    const cards = container.querySelectorAll('.marriage-unit');
-    if (cards.length === 0) {
-        // Jika tiada kad, letak di tengah skrin biasa
-        panX = window.innerWidth / 2 - 150;
-        panY = window.innerHeight / 2 - 100;
-        scale = 1;
-        updateTransform();
-        return;
-    }
+        // Fungsi Butang Zoom In & Zoom Out
+        function zoomIn() {
+            scale = Math.min(scale * 1.2, 2.5);
+            updateTransform();
+        }
 
-    // Kira purata kedudukan semua kotak kad keluarga yang wujud
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    
-    cards.forEach(card => {
-        const rect = card.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        
-        // Dapatkan posisi relatif dalam container
-        const x = (rect.left - containerRect.left) / scale;
-        const y = (rect.top - containerRect.top) / scale;
-        
-        if (x < minX) minX = x;
-        if (y < minY) minY = y;
-        if (x + rect.width > maxX) maxX = x + rect.width;
-        if (y + rect.height > maxY) maxY = y + rect.height;
-    });
+        function zoomOut() {
+            scale = Math.max(scale / 1.2, 0.3);
+            updateTransform();
+        }
 
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
+        // Fungsi Pusatkan Semula Pintar (Auto-Center)
+        function centerView() {
+            const cards = container.querySelectorAll('.marriage-unit');
+            if (cards.length === 0) {
+                panX = window.innerWidth / 2 - 150;
+                panY = window.innerHeight / 2 - 100;
+                scale = 1;
+                updateTransform();
+                return;
+            }
 
-    // Laraskan panX dan panY supaya kelompok kad berada tepat di tengah viewport
-    panX = (window.innerWidth / 2) - (centerX * scale);
-    panY = (window.innerHeight / 2) - (centerY * scale);
-    
-    updateTransform();
-}
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                const x = (rect.left - containerRect.left) / scale;
+                const y = (rect.top - containerRect.top) / scale;
+                
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (x + rect.width > maxX) maxX = x + rect.width;
+                if (y + rect.height > maxY) maxY = y + rect.height;
+            });
+
+            const centerX = (minX + maxX) / 2;
+            const centerY = (minY + maxY) / 2;
+
+            panX = (window.innerWidth / 2) - (centerX * scale);
+            panY = (window.innerHeight / 2) - (centerY * scale);
+            
+            updateTransform();
+        }
 
         viewport.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY; });
         window.addEventListener('mousemove', (e) => { if (!isDragging) return; panX = e.clientX - startX; panY = e.clientY - startY; updateTransform(); });
@@ -419,7 +425,7 @@ function centerView() {
             localStorage.setItem('professionalGenogram', JSON.stringify(familyData));
             closeModal();
             renderTree();
-            centerView(); // Automatik bawa skrin ke tengah selepas simpan!
+            centerView();
         }
 
         function editMember(id) {
@@ -487,7 +493,7 @@ function centerView() {
                     familyData = JSON.parse(e.target.result);
                     localStorage.setItem('professionalGenogram', JSON.stringify(familyData));
                     renderTree();
-                    centerView(); // Pusatkan skrin selepas muat naik fail
+                    centerView();
                     alert("Data salasilah berjaya dimuat naik!");
                 } catch(err) {
                     alert("Format fail tidak sah!");
