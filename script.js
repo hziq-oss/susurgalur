@@ -1,374 +1,272 @@
-:root {
-    --bg-main: #f8fafc;
-    --sidebar-bg: #0f172a;
-    --card-bg: #ffffff;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --primary: #3b82f6;
-    --primary-hover: #2563eb;
-    --border-color: #e2e8f0;
-    --danger: #ef4444;
+// Data Awal Contoh (Mock Data)
+let familyMembers = JSON.parse(localStorage.getItem('familyMembers')) || [
+    {
+        id: "1",
+        name: "Hasan Bin Abdullah",
+        gender: "Lelaki",
+        gen: 1,
+        parentId: "",
+        maritalStatus: "Kahwin",
+        spouseName: "Siti Aminah Binti Yusuf",
+        spouseStatus: "active"
+    },
+    {
+        id: "2",
+        name: "Ahmad Bin Hasan",
+        gender: "Lelaki",
+        gen: 2,
+        parentId: "1",
+        maritalStatus: "Kahwin",
+        spouseName: "Fatima Zahra",
+        spouseStatus: "active"
+    },
+    {
+        id: "3",
+        name: "Zainab Binti Hasan",
+        gender: "Perempuan",
+        gen: 2,
+        parentId: "1",
+        maritalStatus: "Bujang",
+        spouseName: "",
+        spouseStatus: "active"
+    }
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+    renderTree();
+    updateParentDropdown();
+});
+
+// Paparkan Salasilah ke Skrin
+function renderTree(filterText = "") {
+    const container = document.getElementById("treeContainer");
+    container.innerHTML = "";
+
+    // Kumpul mengikut Generasi
+    let generations = {};
+    familyMembers.forEach(member => {
+        if (!generations[member.gen]) {
+            generations[member.gen] = [];
+        }
+        generations[member.gen].push(member);
+    });
+
+    // Susun mengikut Gen (1, 2, 3...)
+    const sortedGens = Object.keys(generations).sort((a, b) => a - b);
+
+    if (sortedGens.length === 0) {
+        container.innerHTML = `<p style="color: var(--text-muted);">Tiada rekod ahli keluarga. Sila klik "Tambah Ahli Keluarga".</p>`;
+        document.getElementById("totalMembers").innerText = 0;
+        return;
+    }
+
+    let totalCount = 0;
+
+    sortedGens.forEach(gen => {
+        const genRow = document.createElement("div");
+        genRow.className = "gen-row";
+
+        const genLabel = document.createElement("div");
+        genLabel.className = "gen-label";
+        genLabel.innerText = `Generasi ${gen}`;
+        genRow.appendChild(genLabel);
+
+        const nodesWrapper = document.createElement("div");
+        nodesWrapper.className = "nodes-wrapper";
+
+        generations[gen].forEach(member => {
+            // Tapis carian jika ada
+            if (filterText && !member.name.toLowerCase().includes(filterText.toLowerCase())) {
+                return;
+            }
+            totalCount++;
+
+            const unitDiv = document.createElement("div");
+            unitDiv.className = "family-unit";
+
+            // Kad Individu Utama
+            const mainCard = document.createElement("div");
+            mainCard.className = `person-card ${member.gender === 'Perempuan' ? 'female' : 'male'}`;
+            mainCard.innerHTML = `
+                <div class="person-avatar">
+                    <i class="fa-solid ${member.gender === 'Perempuan' ? 'fa-venus' : 'fa-mars'}"></i>
+                </div>
+                <div class="person-name">${member.name}</div>
+                <div class="person-status">Gen ${member.gen}</div>
+            `;
+            unitDiv.appendChild(mainCard);
+
+            // Jika ada Pasangan (Berkahwin / Pernah Kahwin di sebelah kanan)
+            if (member.maritalStatus !== "Bujang" && member.spouseName) {
+                const divider = document.createElement("div");
+                divider.className = "spouse-divider";
+                divider.innerHTML = `
+                    <i class="fa-solid fa-ring"></i>
+                    <span>${member.spouseStatus === 'divorced' ? 'Cerai' : 'Kahwin'}</span>
+                `;
+                unitDiv.appendChild(divider);
+
+                const spouseCard = document.createElement("div");
+                spouseCard.className = `person-card ${member.gender === 'Perempuan' ? 'male' : 'female'}`;
+                spouseCard.innerHTML = `
+                    <div class="person-avatar">
+                        <i class="fa-solid ${member.gender === 'Perempuan' ? 'fa-mars' : 'fa-venus'}"></i>
+                    </div>
+                    <div class="person-name">${member.spouseName}</div>
+                    <div class="person-status">${member.spouseStatus === 'divorced' ? 'Bekas Pasangan' : 'Pasangan'}</div>
+                `;
+                unitDiv.appendChild(spouseCard);
+            }
+
+            // Butang Tindakan (Edit / Padam)
+            const actions = document.createElement("div");
+            actions.className = "node-actions";
+            actions.innerHTML = `
+                <button onclick="editMember('${member.id}')" title="Sunting"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="deleteMember('${member.id}')" title="Padam"><i class="fa-solid fa-trash"></i></button>
+            `;
+            unitDiv.appendChild(actions);
+
+            nodesWrapper.appendChild(unitDiv);
+        });
+
+        genRow.appendChild(nodesWrapper);
+        container.appendChild(genRow);
+    });
+
+    document.getElementById("totalMembers").innerText = totalCount;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
+// Kawalan Modal
+function openAddModal() {
+    document.getElementById("modalTitle").innerText = "Tambah Ahli Keluarga Baru";
+    document.getElementById("memberForm").reset();
+    document.getElementById("memberId").value = "";
+    document.getElementById("spouseContainer").style.display = "none";
+    updateParentDropdown();
+    document.getElementById("memberModal").style.display = "flex";
 }
 
-body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
+function closeModal() {
+    document.getElementById("memberModal").style.display = "none";
 }
 
-.app-container {
-    display: flex;
-    width: 100%;
-    height: 100%;
+function toggleSpouseFields() {
+    const status = document.getElementById("maritalStatus").value;
+    const spouseContainer = document.getElementById("spouseContainer");
+    if (status === "Bujang") {
+        spouseContainer.style.display = "none";
+    } else {
+        spouseContainer.style.display = "block";
+    }
 }
 
-/* Sidebar */
-.sidebar {
-    width: 280px;
-    background-color: var(--sidebar-bg);
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-    justify-content: space-between;
+// Simpan Data
+function saveMember(event) {
+    event.preventDefault();
+    const id = document.getElementById("memberId").value;
+    const name = document.getElementById("memberName").value;
+    const gender = document.getElementById("memberGender").value;
+    const gen = parseInt(document.getElementById("memberGen").value);
+    const parentId = document.getElementById("parentSelect").value;
+    const maritalStatus = document.getElementById("maritalStatus").value;
+    const spouseName = document.getElementById("spouseName").value;
+    const spouseStatus = document.getElementById("spouseActiveStatus").value;
+
+    if (id) {
+        // Kemaskini Ahli Sedia Ada
+        familyMembers = familyMembers.map(m => {
+            if (m.id === id) {
+                return { ...m, name, gender, gen, parentId, maritalStatus, spouseName, spouseStatus };
+            }
+            return m;
+        });
+    } else {
+        // Tambah Ahli Baru
+        const newMember = {
+            id: Date.now().toString(),
+            name,
+            gender,
+            gen,
+            parentId,
+            maritalStatus,
+            spouseName,
+            spouseStatus
+        };
+        familyMembers.push(newMember);
+    }
+
+    localStorage.setItem('familyMembers', JSON.stringify(familyMembers));
+    closeModal();
+    renderTree();
+    updateParentDropdown();
 }
 
-.sidebar-header h2 {
-    font-size: 1.25rem;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #f8fafc;
+// Sunting Rekod (Sudah dibetulkan)
+function editMember(id) {
+    const member = familyMembers.find(m => m.id === id);
+    if (!member) return;
+
+    document.getElementById("modalTitle").innerText = "Sunting Maklumat Ahli";
+    document.getElementById("memberId").value = member.id;
+    document.getElementById("memberName").value = member.name;
+    document.getElementById("memberGender").value = member.gender;
+    document.getElementById("memberGen").value = member.gen;
+    document.getElementById("maritalStatus").value = member.maritalStatus;
+    document.getElementById("spouseName").value = member.spouseName || "";
+    document.getElementById("spouseActiveStatus").value = member.spouseStatus || "active";
+    
+    toggleSpouseFields();
+    updateParentDropdown();
+    document.getElementById("parentSelect").value = member.parentId || "";
+
+    // Paparkan modal dengan betul
+    document.getElementById("memberModal").style.display = "flex";
 }
 
-.sidebar-header p {
-    font-size: 0.85rem;
-    color: #94a3b8;
+// Padam Rekod
+function deleteMember(id) {
+    if (confirm("Adakah anda pasti mahu memadam ahli keluarga ini?")) {
+        familyMembers = familyMembers.filter(m => m.id !== id);
+        localStorage.setItem('familyMembers', JSON.stringify(familyMembers));
+        renderTree();
+        updateParentDropdown();
+    }
 }
 
-.sidebar-menu {
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+// Kemaskini Senarai Ibu Bapa di Dropdown
+function updateParentDropdown() {
+    const select = document.getElementById("parentSelect");
+    select.innerHTML = `<option value="">-- Tiada (Generasi Pertama) --</option>`;
+    familyMembers.forEach(m => {
+        const option = document.createElement("option");
+        option.value = m.id;
+        option.innerText = `${m.name} (Gen ${m.gen})`;
+        select.appendChild(option);
+    });
 }
 
-.search-box {
-    position: relative;
+// Fungsi Carian
+function filterMembers() {
+    const query = document.getElementById("searchInput").value;
+    renderTree(query);
 }
 
-.search-box i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
+// Set Semula Data
+function resetData() {
+    if (confirm("Semua data akan dikembalikan kepada asal. Teruskan?")) {
+        localStorage.removeItem('familyMembers');
+        location.reload();
+    }
 }
 
-.search-box input {
-    width: 100%;
-    padding: 10px 10px 10px 38px;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    color: white;
-    font-size: 0.9rem;
-}
-
-.stats-card {
-    background: #1e293b;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #334155;
-}
-
-.stats-card h3 {
-    font-size: 0.9rem;
-    color: #94a3b8;
-    margin-bottom: 8px;
-}
-
-.stats-card p {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #38bdf8;
-}
-
-.sidebar-footer p {
-    font-size: 0.75rem;
-    color: #64748b;
-    text-align: center;
-}
-
-/* Main Content */
-.main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-}
-
-.topbar {
-    height: 70px;
-    background: var(--card-bg);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
-}
-
-.topbar h1 {
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.topbar-actions {
-    display: flex;
-    gap: 10px;
-}
-
-/* Canvas / Tree Area */
-.canvas-container {
-    flex: 1;
-    padding: 30px;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-}
-
-/* Generational Rows */
-.gen-row {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    gap: 15px;
-}
-
-.gen-label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    background: #e2e8f0;
-    padding: 4px 12px;
-    border-radius: 20px;
-    color: var(--text-muted);
-}
-
-.nodes-wrapper {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-/* Family Unit Node (Suami + Isteri Bersebelah) */
-.family-unit {
-    display: flex;
-    align-items: center;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-    padding: 12px;
-    gap: 12px;
-    position: relative;
-}
-
-.person-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-    min-width: 130px;
-}
-
-.person-avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: #e0f2fe;
-    color: #0284c7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    margin-bottom: 8px;
-}
-
-.person-card.female .person-avatar {
-    background: #fce7f3;
-    color: #db2777;
-}
-
-.person-name {
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 4px;
-}
-
-.person-status {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-.spouse-divider {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #94a3b8;
-    font-size: 0.8rem;
-    gap: 4px;
-}
-
-.spouse-divider i {
-    color: #f43f5e;
-}
-
-.node-actions {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    display: flex;
-    gap: 4px;
-}
-
-.node-actions button {
-    background: #ffffff;
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    font-size: 0.7rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.node-actions button:hover {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-/* Buttons & Forms */
-.btn-primary {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: background 0.2s;
-}
-
-.btn-primary:hover {
-    background: var(--primary-hover);
-}
-
-.btn-secondary {
-    background: transparent;
-    color: var(--text-main);
-    border: 1px solid var(--border-color);
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-secondary:hover {
-    background: #f1f5f9;
-}
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    width: 450px;
-    max-width: 90%;
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-    position: relative;
-}
-
-.close {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text-muted);
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-row {
-    display: flex;
-    gap: 15px;
-}
-
-.form-row .form-group {
-    flex: 1;
-}
-
-.form-group label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin-bottom: 6px;
-}
-
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.9rem;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 25px;
+// Eksport Data ke JSON
+function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(familyMembers, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", "salasilah_keluarga.json");
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
 }
