@@ -58,7 +58,6 @@
         .card-actions { position: absolute; top: -6px; right: -6px; display: flex; gap: 3px; }
         .card-actions button { background: #111; border: 1px solid #d4af37; color: #d4af37; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
 
-        /* DIPERBETULKAN: Menggunakan fixed supaya sentiasa berada tepat di tengah skrin */
         .empty-state { 
             position: fixed; 
             top: 50%; 
@@ -96,6 +95,7 @@
         <button class="btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Muat Naik</button>
         <input type="file" id="importFile" style="display:none" accept=".json" onchange="uploadJSON(event)">
         <button class="btn-danger" onclick="resetData()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+        <button class="btn-secondary" onclick="centerView()"><i class="fa-solid fa-crosshairs"></i> Pusatkan</button>
     </div>
 
     <div id="viewport">
@@ -104,7 +104,6 @@
         </div>
     </div>
 
-    <!-- Mesej Kosong Diletakkan Tetap di Tengah Skrin -->
     <div id="emptyMessage" class="empty-state" style="display:none;">
         <h3>Tiada Rekod Salasilah</h3>
         <p>Sila klik butang "Tambah" di atas untuk mula membina carta keluarga.</p>
@@ -196,11 +195,19 @@
         const container = document.getElementById('canvasContainer');
         const svgCanvas = document.getElementById('svgCanvas');
         const emptyMessage = document.getElementById('emptyMessage');
-        let scale = 1, panX = window.innerWidth / 2 - 200, panY = 80;
+        let scale = 1, panX = window.innerWidth / 2 - 150, panY = 100;
         let isDragging = false, startX, startY;
 
         function updateTransform() {
             container.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        }
+
+        // Fungsi Auto-Center Pandangan ke Tengah Salasilah
+        function centerView() {
+            panX = window.innerWidth / 2 - 150;
+            panY = 100;
+            scale = 1;
+            updateTransform();
         }
 
         viewport.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY; });
@@ -380,6 +387,7 @@
             localStorage.setItem('professionalGenogram', JSON.stringify(familyData));
             closeModal();
             renderTree();
+            centerView(); // Automatik bawa skrin ke tengah selepas simpan!
         }
 
         function editMember(id) {
@@ -447,6 +455,7 @@
                     familyData = JSON.parse(e.target.result);
                     localStorage.setItem('professionalGenogram', JSON.stringify(familyData));
                     renderTree();
+                    centerView(); // Pusatkan skrin selepas muat naik fail
                     alert("Data salasilah berjaya dimuat naik!");
                 } catch(err) {
                     alert("Format fail tidak sah!");
