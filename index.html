@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Salasilah Keluarga - Suami Kiri, Isteri Kanan</title>
+    <title>Salasilah Keluarga - Lengkap Jantina & Garisan</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -23,7 +23,6 @@
         .gen-level { display: flex; gap: 120px; justify-content: center; margin-bottom: 180px; position: relative; z-index: 2; }
         .gen-title { position: absolute; left: -100px; top: 20px; color: #d4af37; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
 
-        /* Susunan Kotak: Suami di Kiri, Isteri-isteri di Kanan */
         .marriage-unit {
             background: rgba(20, 20, 18, 0.95);
             border: 1px solid rgba(212, 175, 55, 0.4);
@@ -43,7 +42,7 @@
         .badge { font-size: 0.55rem; padding: 2px 5px; border-radius: 4px; margin-top: 2px; text-transform: uppercase; }
         .badge-active { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
         .badge-divorced { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-        .badge-husband { background: rgba(212, 175, 55, 0.2); color: #d4af37; }
+        .badge-main { background: rgba(212, 175, 55, 0.2); color: #d4af37; }
 
         .spouse-divider { color: #d4af37; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; }
         .card-actions { position: absolute; top: -6px; right: -6px; display: flex; gap: 3px; }
@@ -52,7 +51,7 @@
         .footer-hint { position: fixed; bottom: 15px; right: 15px; background: rgba(20, 20, 20, 0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 15px; font-size: 0.7rem; color: #aaa; pointer-events: none; z-index: 90; }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #121210; border: 1px solid rgba(212, 175, 55, 0.4); padding: 25px; border-radius: 14px; width: 100%; max-width: 380px; color: #fff; }
+        .modal-content { background: #121210; border: 1px solid rgba(212, 175, 55, 0.4); padding: 25px; border-radius: 14px; width: 100%; max-width: 380px; color: #fff; max-height: 90vh; overflow-y: auto; }
         .modal-content h2 { margin-bottom: 15px; color: #d4af37; font-size: 1.1rem; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 0.8rem; margin-bottom: 4px; color: #ccc; }
@@ -82,8 +81,15 @@
             <form id="familyForm" onsubmit="saveData(event)">
                 <input type="hidden" id="memberId">
                 <div class="form-group">
-                    <label>Nama Suami / Ayah (L) - Di Kiri</label>
-                    <input type="text" id="husbandName" required placeholder="Contoh: Ayah (L)">
+                    <label>Nama Individu Utama (Kiri)</label>
+                    <input type="text" id="husbandName" required placeholder="Contoh: Ayah (L) atau Anak (P)">
+                </div>
+                <div class="form-group">
+                    <label>Jantina Individu Utama</label>
+                    <select id="husbandGender">
+                        <option value="L">Lelaki (L)</option>
+                        <option value="P">Perempuan (P)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Generasi (Gen)</label>
@@ -134,21 +140,23 @@
     </div>
 
     <script>
-        let familyData = JSON.parse(localStorage.getItem('husbandLeftData')) || [
+        let familyData = JSON.parse(localStorage.getItem('genderFixData')) || [
             { 
                 id: "1", 
-                husband: "Ayah (L)", 
+                husband: "Ayah", 
+                husbandGender: "L", 
                 gen: 1, 
                 parentId: "", 
                 lineageSource: "wife1",
-                wife1: "Isteri 1 (P)", 
+                wife1: "Isteri 1", 
                 wife1Status: "cerai", 
-                wife2: "Isteri 2 (P)", 
+                wife2: "Isteri 2", 
                 wife2Status: "active" 
             },
             { 
                 id: "2", 
-                husband: "Anak 1 (Dari Isteri 1)", 
+                husband: "Anak (Gen 2 Perempuan)", 
+                husbandGender: "P", 
                 gen: 2, 
                 parentId: "1", 
                 lineageSource: "wife1",
@@ -207,7 +215,9 @@
                     branch.className = 'family-branch';
                     branch.id = `node-${m.id}`;
 
-                    // Susunan Kotak: [Suami di Kiri] --- [Isteri 1 di Kanan] --- [Isteri 2 di Kanan]
+                    const mainGender = m.husbandGender || "L";
+                    const mainIcon = mainGender === 'P' ? 'fa-venus' : 'fa-mars';
+
                     let wife1HTML = m.wife1 ? `
                         <div class="spouse-divider"><i class="fa-solid fa-ring"></i></div>
                         <div class="person-card" id="wife1-node-${m.id}">
@@ -229,9 +239,9 @@
                     branch.innerHTML = `
                         <div class="marriage-unit">
                             <div class="person-card" id="husband-node-${m.id}">
-                                <div class="avatar"><i class="fa-solid fa-mars"></i></div>
+                                <div class="avatar"><i class="fa-solid ${mainIcon}"></i></div>
                                 <div class="name">${m.husband}</div>
-                                <div class="badge badge-husband">Suami</div>
+                                <div class="badge badge-main">${mainGender}</div>
                             </div>
                             ${wife1HTML}
                             ${wife2HTML}
@@ -246,7 +256,6 @@
                 container.appendChild(row);
             });
 
-            // Lukis Garisan SVG Keturunan Khusus Turun dari Isteri yang dipilih
             setTimeout(() => {
                 familyData.forEach(m => {
                     if (m.parentId) {
@@ -254,11 +263,9 @@
                         const childEl = document.getElementById(`node-${m.id}`);
 
                         if (parentUnit && childEl) {
-                            // Tentukan sama ada garisan turun dari Isteri 1 atau Isteri 2 mengikut pilihan
                             const targetWifeId = m.lineageSource === 'wife2' ? `wife2-node-${m.parentId}` : `wife1-node-${m.parentId}`;
                             let sourceEl = document.getElementById(targetWifeId);
                             
-                            // Jika tiada isteri tersebut, fallback ke suami
                             if (!sourceEl) {
                                 sourceEl = document.getElementById(`husband-node-${m.parentId}`);
                             }
@@ -299,6 +306,7 @@
             document.getElementById('modalTitle').innerText = "Tambah Rekod Keluarga";
             document.getElementById('familyForm').reset();
             document.getElementById('memberId').value = "";
+            document.getElementById('husbandGender').value = "L";
             document.getElementById('familyModal').style.display = "flex";
         }
 
@@ -308,6 +316,7 @@
             e.preventDefault();
             const id = document.getElementById('memberId').value;
             const husband = document.getElementById('husbandName').value;
+            const husbandGender = document.getElementById('husbandGender').value;
             const gen = parseInt(document.getElementById('memberGen').value);
             const parentId = document.getElementById('parentSelect').value;
             const lineageSource = document.getElementById('lineageSource').value;
@@ -317,12 +326,12 @@
             const wife2Status = document.getElementById('wife2Status').value;
 
             if (id) {
-                familyData = familyData.map(m => m.id === id ? { ...m, husband, gen, parentId, lineageSource, wife1, wife1Status, wife2, wife2Status } : m);
+                familyData = familyData.map(m => m.id === id ? { ...m, husband, husbandGender, gen, parentId, lineageSource, wife1, wife1Status, wife2, wife2Status } : m);
             } else {
-                familyData.push({ id: Date.now().toString(), husband, gen, parentId, lineageSource, wife1, wife1Status, wife2, wife2Status });
+                familyData.push({ id: Date.now().toString(), husband, husbandGender, gen, parentId, lineageSource, wife1, wife1Status, wife2, wife2Status });
             }
 
-            localStorage.setItem('husbandLeftData', JSON.stringify(familyData));
+            localStorage.setItem('genderFixData', JSON.stringify(familyData));
             closeModal();
             renderTree();
         }
@@ -333,6 +342,7 @@
             document.getElementById('modalTitle').innerText = "Sunting Rekod";
             document.getElementById('memberId').value = m.id;
             document.getElementById('husbandName').value = m.husband;
+            document.getElementById('husbandGender').value = m.husbandGender || "L";
             document.getElementById('memberGen').value = m.gen;
             document.getElementById('parentSelect').value = m.parentId || "";
             document.getElementById('lineageSource').value = m.lineageSource || "wife1";
@@ -346,7 +356,7 @@
         function deleteMember(id) {
             if (confirm("Padam rekod ini?")) {
                 familyData = familyData.filter(m => m.id !== id);
-                localStorage.setItem('husbandLeftData', JSON.stringify(familyData));
+                localStorage.setItem('genderFixData', JSON.stringify(familyData));
                 renderTree();
             }
         }
@@ -361,7 +371,7 @@
 
         function resetData() {
             if (confirm("Tetapkan semula semua data?")) {
-                localStorage.removeItem('husbandLeftData');
+                localStorage.removeItem('genderFixData');
                 location.reload();
             }
         }
