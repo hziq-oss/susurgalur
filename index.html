@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Salasilah Keluarga - Lengkap Jantina & Garisan</title>
+    <title>Salasilah Keluarga - Sistem Pasangan Dinamik</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -30,33 +30,34 @@
             padding: 12px 16px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             position: relative;
         }
 
-        .person-card { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 80px; }
-        .avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; color: #d4af37; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; margin-bottom: 4px; }
-        .name { font-weight: 600; font-size: 0.8rem; color: #fff; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .person-card { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 75px; }
+        .avatar { width: 34px; height: 34px; border-radius: 50%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; color: #d4af37; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; margin-bottom: 4px; }
+        .name { font-weight: 600; font-size: 0.75rem; color: #fff; max-width: 85px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .badge { font-size: 0.55rem; padding: 2px 5px; border-radius: 4px; margin-top: 2px; text-transform: uppercase; }
+        .badge { font-size: 0.5rem; padding: 2px 4px; border-radius: 4px; margin-top: 2px; text-transform: uppercase; }
         .badge-active { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
         .badge-divorced { background: rgba(239, 68, 68, 0.2); color: #f87171; }
         .badge-main { background: rgba(212, 175, 55, 0.2); color: #d4af37; }
 
-        .spouse-divider { color: #d4af37; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; }
+        .spouse-divider { color: #d4af37; font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; }
         .card-actions { position: absolute; top: -6px; right: -6px; display: flex; gap: 3px; }
-        .card-actions button { background: #111; border: 1px solid #d4af37; color: #d4af37; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; }
+        .card-actions button { background: #111; border: 1px solid #d4af37; color: #d4af37; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
 
         .footer-hint { position: fixed; bottom: 15px; right: 15px; background: rgba(20, 20, 20, 0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 15px; font-size: 0.7rem; color: #aaa; pointer-events: none; z-index: 90; }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #121210; border: 1px solid rgba(212, 175, 55, 0.4); padding: 25px; border-radius: 14px; width: 100%; max-width: 380px; color: #fff; max-height: 90vh; overflow-y: auto; }
-        .modal-content h2 { margin-bottom: 15px; color: #d4af37; font-size: 1.1rem; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 0.8rem; margin-bottom: 4px; color: #ccc; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; background: #1a1916; border: 1px solid #333; color: #fff; border-radius: 8px; outline: none; font-size: 0.9rem; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+        .modal-content { background: #121210; border: 1px solid rgba(212, 175, 55, 0.4); padding: 20px; border-radius: 14px; width: 100%; max-width: 420px; color: #fff; max-height: 90vh; overflow-y: auto; }
+        .modal-content h2 { margin-bottom: 12px; color: #d4af37; font-size: 1.05rem; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 0.75rem; margin-bottom: 3px; color: #ccc; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; background: #1a1916; border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; font-size: 0.85rem; }
+        .spouse-block { background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -74,7 +75,7 @@
 
     <div class="footer-hint">Sentuh & Heret untuk gerakkan peta</div>
 
-    <!-- Modal -->
+    <!-- Modal Borang Dinamik -->
     <div id="familyModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle">Tambah Rekod Keluarga</h2>
@@ -82,11 +83,11 @@
                 <input type="hidden" id="memberId">
                 <div class="form-group">
                     <label>Nama Individu Utama (Kiri)</label>
-                    <input type="text" id="husbandName" required placeholder="Contoh: Ayah (L) atau Anak (P)">
+                    <input type="text" id="mainName" required placeholder="Contoh: Ayah atau Anak">
                 </div>
                 <div class="form-group">
                     <label>Jantina Individu Utama</label>
-                    <select id="husbandGender">
+                    <select id="mainGender">
                         <option value="L">Lelaki (L)</option>
                         <option value="P">Perempuan (P)</option>
                     </select>
@@ -102,65 +103,67 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Sambungkan Salasilah Dari Ibu (Isteri Mana?)</label>
-                    <select id="lineageSource">
-                        <option value="wife1">Turun dari Isteri 1</option>
-                        <option value="wife2">Turun dari Isteri 2</option>
+                    <label>Sambung Garisan Keturunan Dari Pasangan Ke-</label>
+                    <select id="lineageIndex">
+                        <option value="0">Pasangan 1</option>
+                        <option value="1">Pasangan 2</option>
+                        <option value="2">Pasangan 3</option>
+                        <option value="3">Pasangan 4</option>
                     </select>
                 </div>
-                <hr style="border-color:#333; margin: 15px 0;">
-                <div class="form-group">
-                    <label>Nama Isteri Pertama (P) - Di Kanan</label>
-                    <input type="text" id="wife1Name" placeholder="Contoh: Isteri 1 (P)">
+
+                <hr style="border-color:#333; margin: 12px 0;">
+                <label style="color:#d4af37; font-size:0.8rem; font-weight:600; display:block; margin-bottom:8px;">Senarai Pasangan (Sehingga 4 Orang)</label>
+                
+                <!-- Pasangan 1 -->
+                <div class="spouse-block">
+                    <div class="form-group"><label>Nama Pasangan 1</label><input type="text" id="s0_name" placeholder="Nama Pasangan 1"></div>
+                    <div class="form-group"><label>Jantina Pasangan 1</label><select id="s0_gender"><option value="P">Perempuan (P)</option><option value="L">Lelaki (L)</option></select></div>
+                    <div class="form-group"><label>Status Pasangan 1</label><select id="s0_status"><option value="active">Aktif</option><option value="cerai">Cerai</option></select></div>
                 </div>
-                <div class="form-group">
-                    <label>Status Isteri Pertama</label>
-                    <select id="wife1Status">
-                        <option value="active">Aktif (Berkahwin)</option>
-                        <option value="cerai">Cerai</option>
-                    </select>
+
+                <!-- Pasangan 2 -->
+                <div class="spouse-block">
+                    <div class="form-group"><label>Nama Pasangan 2 (Opsional)</label><input type="text" id="s1_name" placeholder="Nama Pasangan 2"></div>
+                    <div class="form-group"><label>Jantina Pasangan 2</label><select id="s1_gender"><option value="P">Perempuan (P)</option><option value="L">Lelaki (L)</option></select></div>
+                    <div class="form-group"><label>Status Pasangan 2</label><select id="s1_status"><option value="active">Aktif</option><option value="cerai">Cerai</option></select></div>
                 </div>
-                <div class="form-group">
-                    <label>Nama Isteri Kedua (P) - Di Kanan</label>
-                    <input type="text" id="wife2Name" placeholder="Contoh: Isteri 2 (P)">
+
+                <!-- Pasangan 3 -->
+                <div class="spouse-block">
+                    <div class="form-group"><label>Nama Pasangan 3 (Opsional)</label><input type="text" id="s2_name" placeholder="Nama Pasangan 3"></div>
+                    <div class="form-group"><label>Jantina Pasangan 3</label><select id="s2_gender"><option value="P">Perempuan (P)</option><option value="L">Lelaki (L)</option></select></div>
+                    <div class="form-group"><label>Status Pasangan 3</label><select id="s2_status"><option value="active">Aktif</option><option value="cerai">Cerai</option></select></div>
                 </div>
-                <div class="form-group">
-                    <label>Status Isteri Kedua</label>
-                    <select id="wife2Status">
-                        <option value="active">Aktif (Berkahwin)</option>
-                        <option value="cerai">Cerai</option>
-                    </select>
+
+                <!-- Pasangan 4 -->
+                <div class="spouse-block">
+                    <div class="form-group"><label>Nama Pasangan 4 (Opsional)</label><input type="text" id="s3_name" placeholder="Nama Pasangan 4"></div>
+                    <div class="form-group"><label>Jantina Pasangan 4</label><select id="s3_gender"><option value="P">Perempuan (P)</option><option value="L">Lelaki (L)</option></select></div>
+                    <div class="form-group"><label>Status Pasangan 4</label><select id="s3_status"><option value="active">Aktif</option><option value="cerai">Cerai</option></select></div>
                 </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeModal()" style="color:#ccc; border-color:#555;">Batal</button>
-                    <button type="submit" class="btn-gold" style="padding: 10px 16px;">Simpan</button>
+                    <button type="submit" class="btn-gold" style="padding: 8px 14px;">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        let familyData = JSON.parse(localStorage.getItem('genderFixData')) || [
+        let familyData = JSON.parse(localStorage.getItem('multiSpouseData')) || [
             { 
                 id: "1", 
-                husband: "Ayah", 
-                husbandGender: "L", 
+                mainName: "Ayah", 
+                mainGender: "L", 
                 gen: 1, 
                 parentId: "", 
-                lineageSource: "wife1",
-                wife1: "Isteri 1", 
-                wife1Status: "cerai", 
-                wife2: "Isteri 2", 
-                wife2Status: "active" 
-            },
-            { 
-                id: "2", 
-                husband: "Anak (Gen 2 Perempuan)", 
-                husbandGender: "P", 
-                gen: 2, 
-                parentId: "1", 
-                lineageSource: "wife1",
-                wife1: "", wife1Status: "active", wife2: "", wife2Status: "active" 
+                lineageIndex: 0,
+                spouses: [
+                    { name: "Isteri 1", gender: "P", status: "cerai" },
+                    { name: "Isteri 2", gender: "P", status: "active" }
+                ]
             }
         ];
 
@@ -215,36 +218,33 @@
                     branch.className = 'family-branch';
                     branch.id = `node-${m.id}`;
 
-                    const mainGender = m.husbandGender || "L";
-                    const mainIcon = mainGender === 'P' ? 'fa-venus' : 'fa-mars';
+                    const mainIcon = m.mainGender === 'P' ? 'fa-venus' : 'fa-mars';
 
-                    let wife1HTML = m.wife1 ? `
-                        <div class="spouse-divider"><i class="fa-solid fa-ring"></i></div>
-                        <div class="person-card" id="wife1-node-${m.id}">
-                            <div class="avatar"><i class="fa-solid fa-venus" style="color:#f43f5e"></i></div>
-                            <div class="name">${m.wife1}</div>
-                            <div class="badge ${m.wife1Status === 'cerai' ? 'badge-divorced' : 'badge-active'}">${m.wife1Status === 'cerai' ? 'Cerai' : 'Aktif'}</div>
-                        </div>
-                    ` : '';
-
-                    let wife2HTML = m.wife2 ? `
-                        <div class="spouse-divider"><i class="fa-solid fa-ring"></i></div>
-                        <div class="person-card" id="wife2-node-${m.id}">
-                            <div class="avatar"><i class="fa-solid fa-venus" style="color:#f43f5e"></i></div>
-                            <div class="name">${m.wife2}</div>
-                            <div class="badge ${m.wife2Status === 'cerai' ? 'badge-divorced' : 'badge-active'}">${m.wife2Status === 'cerai' ? 'Cerai' : 'Aktif'}</div>
-                        </div>
-                    ` : '';
+                    let spousesHTML = '';
+                    if (m.spouses && m.spouses.length > 0) {
+                        m.spouses.forEach((sp, idx) => {
+                            if (sp.name) {
+                                const spIcon = sp.gender === 'L' ? 'fa-mars' : 'fa-venus';
+                                spousesHTML += `
+                                    <div class="spouse-divider"><i class="fa-solid fa-ring"></i></div>
+                                    <div class="person-card" id="spouse-${m.id}-${idx}">
+                                        <div class="avatar"><i class="fa-solid ${spIcon}" style="color:#f43f5e"></i></div>
+                                        <div class="name">${sp.name}</div>
+                                        <div class="badge ${sp.status === 'cerai' ? 'badge-divorced' : 'badge-active'}">${sp.status === 'cerai' ? 'Cerai' : 'Aktif'}</div>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
 
                     branch.innerHTML = `
                         <div class="marriage-unit">
-                            <div class="person-card" id="husband-node-${m.id}">
+                            <div class="person-card" id="main-node-${m.id}">
                                 <div class="avatar"><i class="fa-solid ${mainIcon}"></i></div>
-                                <div class="name">${m.husband}</div>
-                                <div class="badge badge-main">${mainGender}</div>
+                                <div class="name">${m.mainName}</div>
+                                <div class="badge badge-main">${m.mainGender}</div>
                             </div>
-                            ${wife1HTML}
-                            ${wife2HTML}
+                            ${spousesHTML}
                             <div class="card-actions">
                                 <button onclick="editMember('${m.id}')"><i class="fa-solid fa-pen"></i></button>
                                 <button onclick="deleteMember('${m.id}')"><i class="fa-solid fa-trash"></i></button>
@@ -263,11 +263,11 @@
                         const childEl = document.getElementById(`node-${m.id}`);
 
                         if (parentUnit && childEl) {
-                            const targetWifeId = m.lineageSource === 'wife2' ? `wife2-node-${m.parentId}` : `wife1-node-${m.parentId}`;
-                            let sourceEl = document.getElementById(targetWifeId);
+                            const targetSpouseId = `spouse-${m.parentId}-${m.lineageIndex || 0}`;
+                            let sourceEl = document.getElementById(targetSpouseId);
                             
                             if (!sourceEl) {
-                                sourceEl = document.getElementById(`husband-node-${m.parentId}`);
+                                sourceEl = document.getElementById(`main-node-${m.parentId}`);
                             }
 
                             const pRect = sourceEl.getBoundingClientRect();
@@ -306,7 +306,7 @@
             document.getElementById('modalTitle').innerText = "Tambah Rekod Keluarga";
             document.getElementById('familyForm').reset();
             document.getElementById('memberId').value = "";
-            document.getElementById('husbandGender').value = "L";
+            document.getElementById('mainGender').value = "L";
             document.getElementById('familyModal').style.display = "flex";
         }
 
@@ -315,23 +315,31 @@
         function saveData(e) {
             e.preventDefault();
             const id = document.getElementById('memberId').value;
-            const husband = document.getElementById('husbandName').value;
-            const husbandGender = document.getElementById('husbandGender').value;
+            const mainName = document.getElementById('mainName').value;
+            const mainGender = document.getElementById('mainGender').value;
             const gen = parseInt(document.getElementById('memberGen').value);
             const parentId = document.getElementById('parentSelect').value;
-            const lineageSource = document.getElementById('lineageSource').value;
-            const wife1 = document.getElementById('wife1Name').value;
-            const wife1Status = document.getElementById('wife1Status').value;
-            const wife2 = document.getElementById('wife2Name').value;
-            const wife2Status = document.getElementById('wife2Status').value;
+            const lineageIndex = parseInt(document.getElementById('lineageIndex').value);
 
-            if (id) {
-                familyData = familyData.map(m => m.id === id ? { ...m, husband, husbandGender, gen, parentId, lineageSource, wife1, wife1Status, wife2, wife2Status } : m);
-            } else {
-                familyData.push({ id: Date.now().toString(), husband, husbandGender, gen, parentId, lineageSource, wife1, wife1Status, wife2, wife2Status });
+            let spouses = [];
+            for(let i=0; i<4; i++) {
+                const name = document.getElementById(`s${i}_name`).value.trim();
+                if(name) {
+                    spouses.push({
+                        name: name,
+                        gender: document.getElementById(`s${i}_gender`).value,
+                        status: document.getElementById(`s${i}_status`).value
+                    });
+                }
             }
 
-            localStorage.setItem('genderFixData', JSON.stringify(familyData));
+            if (id) {
+                familyData = familyData.map(m => m.id === id ? { ...m, mainName, mainGender, gen, parentId, lineageIndex, spouses } : m);
+            } else {
+                familyData.push({ id: Date.now().toString(), mainName, mainGender, gen, parentId, lineageIndex, spouses });
+            }
+
+            localStorage.setItem('multiSpouseData', JSON.stringify(familyData));
             closeModal();
             renderTree();
         }
@@ -341,22 +349,35 @@
             if (!m) return;
             document.getElementById('modalTitle').innerText = "Sunting Rekod";
             document.getElementById('memberId').value = m.id;
-            document.getElementById('husbandName').value = m.husband;
-            document.getElementById('husbandGender').value = m.husbandGender || "L";
+            document.getElementById('mainName').value = m.mainName;
+            document.getElementById('mainGender').value = m.mainGender || "L";
             document.getElementById('memberGen').value = m.gen;
             document.getElementById('parentSelect').value = m.parentId || "";
-            document.getElementById('lineageSource').value = m.lineageSource || "wife1";
-            document.getElementById('wife1Name').value = m.wife1 || "";
-            document.getElementById('wife1Status').value = m.wife1Status || "active";
-            document.getElementById('wife2Name').value = m.wife2 || "";
-            document.getElementById('wife2Status').value = m.wife2Status || "active";
+            document.getElementById('lineageIndex').value = m.lineageIndex || 0;
+
+            for(let i=0; i<4; i++) {
+                document.getElementById(`s${i}_name`).value = "";
+                document.getElementById(`s${i}_gender`).value = "P";
+                document.getElementById(`s${i}_status`).value = "active";
+            }
+
+            if(m.spouses) {
+                m.spouses.forEach((sp, i) => {
+                    if(i < 4) {
+                        document.getElementById(`s${i}_name`).value = sp.name;
+                        document.getElementById(`s${i}_gender`).value = sp.gender || "P";
+                        document.getElementById(`s${i}_status`).value = sp.status || "active";
+                    }
+                });
+            }
+
             document.getElementById('familyModal').style.display = "flex";
         }
 
         function deleteMember(id) {
             if (confirm("Padam rekod ini?")) {
                 familyData = familyData.filter(m => m.id !== id);
-                localStorage.setItem('genderFixData', JSON.stringify(familyData));
+                localStorage.setItem('multiSpouseData', JSON.stringify(familyData));
                 renderTree();
             }
         }
@@ -365,13 +386,13 @@
             const sel = document.getElementById('parentSelect');
             sel.innerHTML = `<option value="">-- Tiada (Gen 1 Utama) --</option>`;
             familyData.forEach(m => {
-                sel.innerHTML += `<option value="${m.id}">${m.husband} (Gen ${m.gen})</option>`;
+                sel.innerHTML += `<option value="${m.id}">${m.mainName} (Gen ${m.gen})</option>`;
             });
         }
 
         function resetData() {
             if (confirm("Tetapkan semula semua data?")) {
-                localStorage.removeItem('genderFixData');
+                localStorage.removeItem('multiSpouseData');
                 location.reload();
             }
         }
