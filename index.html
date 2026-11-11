@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salasilah Keluarga - Trend Style</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Salasilah Keluarga Interaktif</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
@@ -21,179 +22,353 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
-        /* Header / Statistik atas gaya TikTok */
-        .header-stats {
+        /* Top Control Bar */
+        .top-bar {
             position: absolute;
             top: 20px;
-            text-align: center;
-            z-index: 10;
-            pointer-events: none;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 12px;
         }
 
-        .header-stats h4 {
-            font-size: 0.75rem;
-            letter-spacing: 3px;
-            color: #d4af37;
-            text-transform: uppercase;
-            opacity: 0.8;
-        }
-
-        .header-stats h1 {
-            font-size: 2.5rem;
+        .btn-gold {
+            background: linear-gradient(135deg, #d4af37, #aa7c11);
+            color: #000;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
             font-weight: 600;
-            color: #ffffff;
-            margin-top: 4px;
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
         }
 
-        /* Kotak Arahan / Info Bawah */
-        .footer-info {
-            position: absolute;
-            bottom: 20px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: #aaa;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
         }
 
-        /* Container Canvas yang boleh di-zoom */
+        /* Viewport untuk Zoom & Pan */
         #viewport {
             width: 100%;
             height: 100%;
             cursor: grab;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
 
         #viewport:active {
             cursor: grabbing;
         }
 
-        #treeCanvas {
-            transform-origin: center center;
+        /* Kanvas Carta */
+        #canvasContainer {
+            position: absolute;
+            transform-origin: 0 0;
             transition: transform 0.05s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 100px;
+            min-width: 3000px;
+            min-height: 2000px;
         }
+
+        /* Generasi Baris */
+        .gen-level {
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            margin-bottom: 100px;
+            position: relative;
+        }
+
+        .gen-title {
+            position: absolute;
+            left: -120px;
+            top: 40px;
+            color: #d4af37;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* Kad Keluarga (Gaya Emas Sinematik) */
+        .family-card {
+            background: rgba(20, 20, 18, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .person-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+
+        .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #fff;
+            max-width: 110px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+        .status-active { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .status-divorced { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        .spouse-divider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #d4af37;
+            font-size: 0.75rem;
+            gap: 4px;
+            padding: 0 4px;
+        }
+
+        .card-actions {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .card-actions button {
+            background: #111;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .card-actions button:hover {
+            background: #d4af37;
+            color: #000;
+        }
+
+        /* Panduan Bawah */
+        .footer-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #aaa;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        /* Modal Borang */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #121210;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            padding: 30px;
+            border-radius: 16px;
+            width: 420px;
+            max-width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            color: #fff;
+            position: relative;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #d4af37;
+            font-size: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: #ccc;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #1a1916;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #d4af37;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #555;
+            color: #ccc;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-secondary:hover { border-color: #888; color: #fff; }
     </style>
 </head>
 <body>
 
-    <div class="header-stats">
-        <h4>Ancestors • Salasilah</h4>
-        <h1 id="totalCount">64</h1>
+    <div class="top-bar">
+        <button class="btn-gold" onclick="openModal()"><i class="fa-solid fa-user-plus"></i> Tambah Ahli Keluarga</button>
+        <button class="btn-secondary" onclick="resetData()" style="color:#f87171; border-color:rgba(239,68,68,0.3)"><i class="fa-solid fa-rotate-right"></i> Set Semula</button>
     </div>
 
     <div id="viewport">
-        <canvas id="treeCanvas" width="1200" height="900"></canvas>
+        <div id="canvasContainer">
+            <!-- Carta akan dijanakan secara dinamik di sini -->
+        </div>
     </div>
 
-    <div class="footer-info">
-        Gunakan <b>Skrol Tetikus (Mouse Wheel)</b> untuk Zum In / Zum Out • Klik dan Heret untuk gerakkan peta.
+    <div class="footer-hint">
+        Skrol Tetikus untuk <b>Zoom In/Out</b> • Klik & Heret untuk gerakkan peta
+    </div>
+
+    <!-- Modal Tambah/Sunting -->
+    <div id="familyModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Tambah Ahli Keluarga</h2>
+            <form id="familyForm" onsubmit="saveFamily(event)">
+                <input type="hidden" id="memberId">
+                <div class="form-group">
+                    <label>Nama Penuh</label>
+                    <input type="text" id="memberName" required placeholder="Contoh: Ahmad Bin Hasan">
+                </div>
+                <div class="form-group">
+                    <label>Generasi (Gen)</label>
+                    <input type="number" id="memberGen" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Ibu Bapa (Asal Salasilah)</label>
+                    <select id="parentSelect">
+                        <option value="">-- Tiada (Ketua Keluarga / Gen 1) --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status Perkahwinan</label>
+                    <select id="maritalStatus" onchange="toggleSpouse()">
+                        <option value="bujang">Bujang</option>
+                        <option value="kahwin">Berkahwin (Aktif)</option>
+                        <option value="cerai">Pernah Kahwin / Bercerai</option>
+                    </select>
+                </div>
+                <div id="spouseBox" style="display:none;">
+                    <div class="form-group">
+                        <label>Nama Pasangan (Suami / Isteri)</label>
+                        <input type="text" id="spouseName" placeholder="Nama Pasangan">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn-gold" style="padding: 8px 16px;">Simpan</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('treeCanvas');
-        const ctx = canvas.getContext('2d');
+        // Data Awal Keluarga
+        let members = JSON.parse(localStorage.getItem('tiktokFamilyData')) || [
+            { id: "1", name: "Hasan Bin Abdullah", gen: 1, parentId: "", maritalStatus: "kahwin", spouseName: "Siti Aminah" },
+            { id: "2", name: "Ahmad Bin Hasan", gen: 2, parentId: "1", maritalStatus: "kahwin", spouseName: "Fatima Zahra" },
+            { id: "3", name: "Zainab Binti Hasan", gen: 2, parentId: "1", maritalStatus: "bujang", spouseName: "" }
+        ];
 
-        // Pembolehubah Zoom & Pan
-        let scale = 1;
-        let panX = 0;
-        let panY = 0;
-        let isDragging = false;
-        let startX, startY;
-
+        // Kawalan Zoom & Pan (Heret Peta)
         const viewport = document.getElementById('viewport');
+        const container = document.getElementById('canvasContainer');
+        let scale = 1, panX = window.innerWidth / 2 - 200, panY = 100;
+        let isDragging = false, startX, startY;
 
-        // Data Simulasi Garis Keturunan Bercabang ke Atas
-        function drawTree() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const startXPos = canvas.width / 2;
-            const startYPos = canvas.height - 100;
-
-            // Lukis nod utama "YOU" di bawah
-            drawNode(startXPos, startYPos, "YOU", true);
-
-            // Cabang Generasi ke Atas (Simulasi Algoritma Kipas)
-            drawBranches(startXPos, startYPos, 350, 5, 0);
-        }
-
-        function drawBranches(x, y, spread, level, parentAngle) {
-            if (level <= 0) return;
-
-            const nextY = y - 130;
-            const leftX = x - spread;
-            const rightX = x + spread;
-
-            // Garisan bercabang ke kiri dan kanan atas (Gaya Emas Bersinar)
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.quadraticCurveTo(x, y - 60, leftX, nextY);
-            ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
-            ctx.lineWidth = level * 0.6;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.quadraticCurveTo(x, y - 60, rightX, nextY);
-            ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
-            ctx.lineWidth = level * 0.6;
-            ctx.stroke();
-
-            // Lukis titik nod generasi
-            drawNode(leftX, nextY, "", false);
-            drawNode(rightX, nextY, "", false);
-
-            // Rekursi untuk generasi seterusnya ke atas
-            drawBranches(leftX, nextY, spread / 1.8, level - 1);
-            drawBranches(rightX, nextY, spread / 1.8, level - 1);
-        }
-
-        function drawNode(x, y, label, isYou) {
-            ctx.beginPath();
-            ctx.arc(x, y, isYou ? 8 : 4, 0, Math.PI * 2);
-            ctx.fillStyle = isYou ? "#ffffff" : "#d4af37";
-            ctx.shadowColor = "#d4af37";
-            ctx.shadowBlur = isYou ? 25 : 10;
-            ctx.fill();
-            ctx.shadowBlur = 0; // Reset shadow
-
-            if (label) {
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "600 14px 'Outfit', sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(label, x, y + 30);
-            }
-        }
-
-        // Fungsi Kemas Kini Paparan Transformasi (Zoom & Pan)
         function updateTransform() {
-            canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+            container.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
         }
 
-        // Event Listener untuk Zum (Mouse Wheel)
         viewport.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const zoomIntensity = 0.1;
-            if (e.deltaY < 0) {
-                scale *= (1 + zoomIntensity);
-            } else {
-                scale /= (1 + zoomIntensity);
-            }
-            // Hadkan had zum (min 0.5x, max 4x)
-            scale = Math.max(0.5, Math.min(scale, 4));
+            const zoom = 0.1;
+            scale = e.deltaY < 0 ? scale * (1 + zoom) : scale / (1 + zoom);
+            scale = Math.max(0.3, Math.min(scale, 3));
             updateTransform();
         });
 
-        // Event Listener untuk Tarik / Geser Peta (Pan)
         viewport.addEventListener('mousedown', (e) => {
             isDragging = true;
             startX = e.clientX - panX;
@@ -207,12 +382,140 @@
             updateTransform();
         });
 
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
+        window.addEventListener('mouseup', () => isDragging = false);
 
-        // Jalankan lukisan carta pada permulaan
-        drawTree();
+        // Render Carta Salasilah
+        function renderTree() {
+            container.innerHTML = "";
+            let generations = {};
+
+            members.forEach(m => {
+                if (!generations[m.gen]) generations[m.gen] = [];
+                generations[m.gen].push(m);
+            });
+
+            Object.keys(generations).sort((a,b)=>a-b).forEach(gen => {
+                const row = document.createElement('div');
+                row.className = 'gen-level';
+                row.innerHTML = `<div class="gen-title">Gen ${gen}</div>`;
+
+                generations[gen].forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = 'family-card';
+                    
+                    let spouseHTML = '';
+                    if (m.maritalStatus !== 'bujang' && m.spouseName) {
+                        const statusClass = m.maritalStatus === 'cerai' ? 'status-divorced' : 'status-active';
+                        const statusText = m.maritalStatus === 'cerai' ? 'Cerai' : 'Aktif';
+                        spouseHTML = `
+                            <div class="spouse-divider">
+                                <i class="fa-solid fa-ring"></i>
+                            </div>
+                            <div class="person-box">
+                                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                                <div class="name">${m.spouseName}</div>
+                                <div class="status-badge ${statusClass}">${statusText}</div>
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="person-box">
+                            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                            <div class="name">${m.name}</div>
+                            <div class="status-badge status-active">Utama</div>
+                        </div>
+                        ${spouseHTML}
+                        <div class="card-actions">
+                            <button onclick="editMember('${m.id}')"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteMember('${m.id}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                    row.appendChild(card);
+                });
+                container.appendChild(row);
+            });
+            updateParentDropdown();
+        }
+
+        // Pengurusan Modal & Borang
+        function openModal() {
+            document.getElementById('modalTitle').innerText = "Tambah Ahli Keluarga";
+            document.getElementById('familyForm').reset();
+            document.getElementById('memberId').value = "";
+            document.getElementById('spouseBox').style.display = "none";
+            document.getElementById('familyModal').style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById('familyModal').style.display = "none";
+        }
+
+        function toggleSpouse() {
+            const val = document.getElementById('maritalStatus').value;
+            document.getElementById('spouseBox').style.display = val === 'bujang' ? 'none' : 'block';
+        }
+
+        function saveFamily(e) {
+            e.preventDefault();
+            const id = document.getElementById('memberId').value;
+            const name = document.getElementById('memberName').value;
+            const gen = parseInt(document.getElementById('memberGen').value);
+            const parentId = document.getElementById('parentSelect').value;
+            const maritalStatus = document.getElementById('maritalStatus').value;
+            const spouseName = document.getElementById('spouseName').value;
+
+            if (id) {
+                members = members.map(m => m.id === id ? { ...m, name, gen, parentId, maritalStatus, spouseName } : m);
+            } else {
+                members.push({ id: Date.now().toString(), name, gen, parentId, maritalStatus, spouseName });
+            }
+
+            localStorage.setItem('tiktokFamilyData', JSON.stringify(members));
+            closeModal();
+            renderTree();
+        }
+
+        function editMember(id) {
+            const m = members.find(item => item.id === id);
+            if (!m) return;
+            document.getElementById('modalTitle').innerText = "Sunting Maklumat";
+            document.getElementById('memberId').value = m.id;
+            document.getElementById('memberName').value = m.name;
+            document.getElementById('memberGen').value = m.gen;
+            document.getElementById('parentSelect').value = m.parentId || "";
+            document.getElementById('maritalStatus').value = m.maritalStatus;
+            document.getElementById('spouseName').value = m.spouseName || "";
+            toggleSpouse();
+            document.getElementById('familyModal').style.display = "flex";
+        }
+
+        function deleteMember(id) {
+            if (confirm("Padam ahli ini?")) {
+                members = members.filter(m => m.id !== id);
+                localStorage.setItem('tiktokFamilyData', JSON.stringify(members));
+                renderTree();
+            }
+        }
+
+        function updateParentDropdown() {
+            const sel = document.getElementById('parentSelect');
+            sel.innerHTML = `<option value="">-- Tiada (Ketua Keluarga / Gen 1) --</option>`;
+            members.forEach(m => {
+                sel.innerHTML += `<option value="${m.id}">${m.name} (Gen ${m.gen})</option>`;
+            });
+        }
+
+        function resetData() {
+            if (confirm("Tetapkan semula semua data?")) {
+                localStorage.removeItem('tiktokFamilyData');
+                location.reload();
+            }
+        }
+
+        // Mulakan paparan
+        updateTransform();
+        renderTree();
     </script>
 </body>
 </html>
